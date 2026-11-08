@@ -15,6 +15,28 @@ npm run dev
 
 The server listens on port 4173. Source lives in `neon-drift/src`; static assets and the generated bundle live in `neon-drift/dist`. Run the build after changing JavaScript. HTML and CSS can be edited directly in `dist`.
 
+## Amp orbs
+
+Amp runs the executable `.agents/setup` when preparing a fresh orb. It uses the base image's Node.js, npm, and Python 3, installs dependencies from the lockfile, builds the game, and reuses the preinstalled agent-browser Chromium (installing it only if missing). Setup is safe to rerun; it never deletes `dist`, starts a server, or deploys to Vercel. No application secrets or database are needed.
+
+From the repository root, start the supervised preview and obtain its authenticated portal link:
+
+```sh
+amp orb services ensure
+```
+
+The `preview` service in `.amp/services.yaml` builds before starting, serves only `neon-drift/dist` on port 4173, and checks `/game.js` for readiness. Share the portal URL printed by Amp, not a localhost URL. Amp supervises the server across CLI updates and orb pause/resume; no `.agents/resume` hook is needed. Generated portal links and local review captures are ignored by Git.
+
+After editing JavaScript, run `npm run build` inside `neon-drift` and refresh the browser; the preview does not watch source files. Use `amp orb service logs preview` to inspect it or `amp orb service restart preview` to rebuild and restart it.
+
+For the browser checks below, reuse the orb's Chromium rather than downloading Playwright's separate browser. Export this in the same shell that runs the checks, then skip `npx playwright install chromium`:
+
+```sh
+export PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(printf '%s\n' "$HOME"/.agent-browser/browsers/chrome-*/chrome | sort -V | tail -n 1)"
+```
+
+Orb configuration must reach the repository's default branch before future orbs can use it.
+
 ## Gameplay
 
 Procedurally generated curved tracks, gaps, pink blocks, full-width low barriers, moving obstacles, coins, and boost gates. Speed rises with distance (18 + 0.56 × √meters) and caps at 38 m/s before boosts. Mixed obstacles appear earlier as distance grows. Hazards are spaced so jumping remains possible. The opening stretch introduces steering, a block, a gap, then a boost. World chunks and city instances are recycled, keeping the live course bounded. Personal best and preferences are saved locally in the browser.

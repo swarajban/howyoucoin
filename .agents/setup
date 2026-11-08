@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Node, npm, Python, and agent-browser are provided by Amp's base orb image.
+echo 'Checking orb toolchain'
+node --version
+npm --version
+python3 --version
+
+echo 'Installing locked game dependencies'
+time npm ci --prefix "$repo_root/neon-drift" --prefer-offline --no-audit --no-fund
+
+echo 'Building How You Coin (dist also contains tracked source assets)'
+time npm run build --prefix "$repo_root/neon-drift"
+
+echo 'Checking Chromium for browser verification'
+chromium=("$HOME"/.agent-browser/browsers/chrome-*/chrome)
+if [[ ! -x "${chromium[0]}" ]]; then
+  time agent-browser install
+fi
+
+echo 'Setup ready. Run amp orb services ensure for the preview; see README.md for browser checks.'

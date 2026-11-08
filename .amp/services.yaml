@@ -1,0 +1,9 @@
+services:
+  preview:
+    cwd: neon-drift
+    command: npm run build && exec python3 -m http.server "$PORT" --bind 0.0.0.0 --directory dist
+    port: 4173
+    health: /game.js
+    portal:
+      title: How You Coin
+      description: Play the orb build. Drag to steer; swipe up or tap JUMP. Desktop uses A/D and Space.
