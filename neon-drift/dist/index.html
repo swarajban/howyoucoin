@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#07081b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="How you coin? Roll through unexpected worlds, collect coins, and see how far you can go.">
+<title>How You Coin — Keep it rolling</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon.png"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="world" aria-label="How You Coin marble running game"></canvas>
+<div class="vignette" aria-hidden="true"></div><div id="star-screen" aria-hidden="true"></div><div id="flash" aria-hidden="true"></div>
+<header id="header">
+<a class="wordmark" href="./" aria-label="How You Coin home"><span class="brand-icon">¢</span><span>HOW YOU <span class="light">COIN</span></span></a>
+<div id="run-hud" class="hidden"><div class="hud-stat"><span>DISTANCE</span><strong id="distance">0<span> m</span></strong></div><div class="hud-divider"></div><div class="hud-stat best-stat"><span>PERSONAL BEST</span><strong id="best-hud">0<span> m</span></strong></div></div>
+<div class="header-actions"><button id="sound" class="icon-button" aria-label="Enable sound" title="Toggle sound"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-wave" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="settings" class="icon-button" aria-label="Open settings" title="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="8" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></svg></button><button id="pause" class="icon-button hidden" aria-label="Pause game"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button></div>
+</header>
+<main id="home" class="home">
+<div class="eyebrow"><span class="status-dot"></span> GOOD VIEWS. LOOSE CHANGE.</div>
+<h1><small>HOW YOU</small><br><span>COIN?</span><i>↗</i></h1>
+<p class="tagline">Keep it rolling.<br>Make a little change.</p>
+<button id="play" class="primary" disabled><span id="play-label">BUILDING YOUR WORLD</span><span class="button-arrow">↗</span></button>
+<div class="scene-picker" role="group" aria-label="Choose a world">
+<button data-scene="orbit" aria-pressed="false"><span class="scene-thumb orbit-thumb"></span><span>Prism Orbit</span></button>
+<button data-scene="abyss" aria-pressed="false"><span class="scene-thumb abyss-thumb"></span><span>Abyssal Bloom</span></button>
+<button data-scene="dunes" aria-pressed="true"><span class="scene-thumb dune-thumb"></span><span>Golden Dunes</span></button>
+<button data-scene="forest" aria-pressed="false"><span class="scene-thumb forest-thumb"></span><span>Cloud Forest</span></button>
+<button data-scene="neon" aria-pressed="false"><span class="scene-thumb neon-thumb"></span><span>Night Shift</span></button>
+</div><p id="scene-description">Sandstone canyons · golden-hour light</p>
+<div class="home-record"><svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L2.5 9.2l5.9-.9Z"/></svg><span>PERSONAL BEST</span><b id="home-best">0 m</b></div>
+</main>
+<div id="home-footer"><span class="edition">01 / GOLDEN DUNES</span><div class="control-intro"><span><b>↔</b> DRAG TO STEER</span><i></i><span><b>↑</b> SWIPE UP TO JUMP</span></div><span class="footer-note">ONE MORE RUN.</span></div>
+<div id="play-ui" class="hidden">
+<div class="run-side"><span id="sector">SECTOR 01</span><strong id="sector-name">AFTER HOURS</strong><div class="sector-track"><i id="sector-progress"></i></div><span id="speed">18 <small>M/S</small></span></div>
+<div id="coins" aria-label="Coins collected"><span class="coin-symbol">¢</span><b id="coin-count">0</b><div id="coin-charge"><div class="charge-label"><span>★ NEXT STAR</span><b id="charge-count">0 / 100</b></div><div id="charge-meter" role="progressbar" aria-label="Coins towards star power" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="charge-fill"></i></div></div></div>
+<div id="star-hud" class="hidden" role="status"><span class="star-icon">★</span><div><strong>STAR POWER</strong><span>BLOCK IMMUNITY</span><div class="power-track"><i id="star-progress"></i></div></div><b id="star-time">6.0s</b></div>
+<div id="toast" role="status"></div>
+<div class="touch-controls"><div id="steer-zone"><span class="steer-arrows">‹ <i></i> ›</span><span>DRAG TO STEER</span></div><button id="jump" aria-label="Jump"><svg viewBox="0 0 32 32"><path d="m8 17 8-8 8 8M16 10v16M7 4h18"/></svg><span>JUMP</span></button></div>
+<div class="desktop-hint">A / D <span>STEER</span><i>·</i> SPACE <span>JUMP</span><i>·</i> ESC <span>PAUSE</span></div>
+</div>
+<div id="modal-layer" class="hidden">
+<section id="pause-panel" class="panel hidden" aria-labelledby="pause-title"><div class="eyebrow">TAKE A BREATH</div><h2 id="pause-title">Hold that<br><em>roll.</em></h2><p>Your next coin can wait.</p><button id="resume" class="primary">KEEP ROLLING <span>→</span></button><button id="pause-settings" class="text-button">Settings & hints</button><button id="restart-pause" class="text-button">Start a fresh run</button><button id="quit" class="text-button muted">Back to the worlds</button></section>
+<section id="over-panel" class="panel hidden" aria-labelledby="over-title"><div id="end-eyebrow" class="eyebrow">EVERY RUN IS A NEW BEGINNING</div><h2 id="over-title">One more<br><em>run?</em></h2><p id="death-reason">Lost your footing. Keep the change.</p><div class="result"><strong id="final-distance">0</strong><span>METERS</span></div><div class="result-details"><span>BEST <b id="final-best">0 m</b></span><span>COINS COLLECTED <b id="final-coins">◉ 0</b></span></div><button id="retry" class="primary">ROLL AGAIN <span>↗</span></button><button id="back-home" class="text-button">Back to the worlds</button></section>
+<section id="settings-panel" class="panel hidden" aria-labelledby="settings-title"><div class="eyebrow">MAKE IT YOURS</div><h2 id="settings-title">Your kind<br><em>of roll.</em></h2><label class="setting-row">Sound & music <input type="checkbox" id="audio-toggle" role="switch"></label><label class="setting-row">Show hints <input type="checkbox" id="hints-toggle" checked role="switch"></label><p id="hints-note" class="preference-note">Automatically shown for your first 3 runs on this device.</p><label class="setting-row">Cinematic glow <input type="checkbox" id="glow-toggle" checked role="switch"></label><label class="setting-row">Reduced camera motion <input type="checkbox" id="motion-toggle" role="switch"></label><label class="setting-row" for="sensitivity">Steering sensitivity <output id="sensitivity-value">1.0×</output></label><input type="range" id="sensitivity" min="0.6" max="1.6" step="0.1" value="1"><p class="settings-note">Drag anywhere to steer. Precise steering follows your finger; watch the edges. Swipe up or tap JUMP to leap. On a keyboard, use A/D or arrow keys and Space.</p><button id="settings-done" class="primary">ALL SET <span>✓</span></button></section>
+</div>
+<div id="fatal" class="hidden" role="alert"><h2>A little more power needed.</h2><p id="fatal-message">This game needs WebGL. Try opening it in Safari or Chrome with hardware acceleration enabled.</p><button onclick="location.reload()" class="primary">TRY AGAIN</button></div>
+<script type="module" src="game.js"></script>
+</body></html>
