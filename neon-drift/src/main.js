@@ -51,11 +51,11 @@ function simulate(dt){
   let axis=0;if(keys.has('ArrowLeft')||keys.has('KeyA'))axis--;if(keys.has('ArrowRight')||keys.has('KeyD'))axis++;
   if(axis)s.target+=axis*dt*8.5*settings.sensitivity;
   s.target=clamp(s.target,-10,10);Object.assign(s,steer(s,s.target,dt));
-  ensureChunks();const c=chunks.find(c=>s.distance>=c.start&&s.distance<c.start+CHUNK);const onRoad=c&&hasFloor(c,s.distance)&&supportedOnRoad(s.x);
-  s.jumpBuffer=Math.max(0,s.jumpBuffer-dt);if(s.grounded&&onRoad)s.coyote=.1;else s.coyote=Math.max(0,s.coyote-dt);
+  ensureChunks();const c=chunks.find(c=>s.distance>=c.start&&s.distance<c.start+CHUNK);const onRoad=c&&hasFloor(c,s.distance)&&supportedOnRoad(s.x),supported=s.star>0||onRoad;
+  s.jumpBuffer=Math.max(0,s.jumpBuffer-dt);if(s.grounded&&supported)s.coyote=.1;else s.coyote=Math.max(0,s.coyote-dt);
   if(s.jumpBuffer>0&&(s.grounded||s.coyote>0))performJump();
-  if(!onRoad)s.grounded=false;
-  if(!s.grounded){s.vy-=GRAVITY*dt;s.y+=s.vy*dt;if(onRoad&&s.y<=RADIUS&&s.y>RADIUS-.22&&s.vy<=0){s.y=RADIUS;s.vy=0;s.grounded=true;s.coyote=.1;sound.land();world.shake=.035;if(s.jumpBuffer>0)performJump();}}
+  if(!supported)s.grounded=false;
+  if(!s.grounded){s.vy-=GRAVITY*dt;s.y+=s.vy*dt;if(supported&&s.y<=RADIUS&&(s.star>0||s.y>RADIUS-.22)&&s.vy<=0){s.y=RADIUS;s.vy=0;s.grounded=true;s.coyote=.1;sound.land();world.shake=.035;if(s.jumpBuffer>0)performJump();}}
   if(s.y<-4){die(Math.abs(s.x)>HALF_WIDTH?'A little too close to the edge.':'Mind the gap. Jump a little earlier.');return;}
   for(const chunk of chunks){
     const h=chunk.hazard;
