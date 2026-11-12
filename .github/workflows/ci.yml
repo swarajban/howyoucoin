@@ -1,0 +1,72 @@
+name: Build and gameplay tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build, unit and browser regressions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: neon-drift
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: neon-drift/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Check committed bundle matches source
+        run: git diff --exit-code -- dist/game.js
+      - run: npm test
+      - name: Install locked Playwright Chromium and Linux dependencies
+        run: |
+          npx playwright install --with-deps chromium
+          node --input-type=module -e 'import {chromium} from "playwright"; console.log(`PLAYWRIGHT_CHROMIUM_EXECUTABLE=${chromium.executablePath()}`)' >> "$GITHUB_ENV"
+      - name: Run browser regressions against local preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist > "$RUNNER_TEMP/preview.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true; cat "$RUNNER_TEMP/preview.log"' EXIT
+          ready=false
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/game.js > /dev/null; then
+              ready=true
+              break
+            fi
+            kill -0 "$preview_pid"
+            sleep 1
+          done
+          test "$ready" = true
+          node test/gameplay-check.mjs
+          node test/coin-meter-check.mjs
+          node test/star-falls-check.mjs
+          node test/browser-check.mjs
+          node test/worlds-check.mjs
+          node test/expansion-check.mjs
+      - name: Upload browser captures and preview log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-diagnostics
+          retention-days: 7
+          if-no-files-found: ignore
+          path: |
+            /tmp/neon-*.png
+            /tmp/howyoucoin-*.png
+            ${{ runner.temp }}/preview.log

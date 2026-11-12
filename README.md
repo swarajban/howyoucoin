@@ -62,6 +62,14 @@ Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to use an existing Chromium installation. T
 
 Validated in Chromium with desktop and touch viewport emulation. Actual iOS Safari device performance still needs hands-on testing.
 
+### Continuous integration
+
+GitHub Actions runs `.github/workflows/ci.yml` on every pull request and push to `main`, using Node.js 24 on Ubuntu 24.04. It installs locked dependencies with `npm ci`, builds, rejects a stale committed `dist/game.js`, runs the unit tests, and installs the lockfile's Playwright Chromium with its Linux dependencies. A temporary preview serves port 4173 and is cleaned up after the browser checks.
+
+CI runs all six browser scripts above: the deterministic 2.5 km gameplay run; coin thresholds, repeat star activations and hints; powered gaps/edges and expiry; rendered desktop/iPad/phone smoke with input and pause assertions; world selection, persistence, scenery direction and reflections; and the expansion worlds and pause settings. The rendered smoke uses a controlled frame clock rather than wall-clock gameplay timing. Browser captures and the preview log are retained as the `browser-diagnostics` artifact for seven days.
+
+These are functional Chromium regressions, not pixel-diff tests or GPU benchmarks. Some checks suppress draw calls, and the fall regression injects test-only access into a source-built bundle; the remaining checks use the committed production bundle after verifying it matches a fresh build. Actual iOS Safari performance, real multitouch and visual quality still need device testing. This workflow does not configure branch protection or gate Vercel: Vercel auto-deploys `main` independently.
+
 ## Deploy
 
 The Vercel project is `howyoucoin`. Root `vercel.json` installs/builds the nested game and publishes `neon-drift/dist`. Run deployment commands at the repository root. A fresh checkout may need `vercel link --project howyoucoin` with access to the existing project; local `.vercel` linkage is intentionally not committed. The game needs no application environment variables.

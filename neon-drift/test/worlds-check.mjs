@@ -9,7 +9,9 @@ for(const theme of ['dunes','forest','neon']){
  assert.equal(await page.evaluate(()=>window.__howYouCoin.getSettings().theme),theme);
 }
 await page.locator('[data-scene=dunes]').tap();await page.locator('#play').tap();await page.waitForFunction(()=>window.__howYouCoin.getState().distance>1);
-const before=await page.evaluate(()=>({s:window.__howYouCoin.getState(),v:window.__howYouCoin.getVisualState()}));await page.waitForFunction(d=>window.__howYouCoin.getState().distance>d+1,before.s.distance);const after=await page.evaluate(()=>({s:window.__howYouCoin.getState(),v:window.__howYouCoin.getVisualState()}));
+const before=await page.evaluate(()=>({s:window.__howYouCoin.getState(),v:window.__howYouCoin.getVisualState()}));
+await page.waitForFunction(before=>window.__howYouCoin.getState().distance>before.s.distance+1&&window.__howYouCoin.getVisualState().reflectionUpdates>before.v.reflectionUpdates,before,{timeout:10000});
+const after=await page.evaluate(()=>({s:window.__howYouCoin.getState(),v:window.__howYouCoin.getVisualState()}));
 assert.ok(after.v.reflectionUpdates>before.v.reflectionUpdates);assert.ok(after.v.buildingPosition[2]>before.v.buildingPosition[2]);assert.ok(Math.abs((after.v.buildingPosition[2]-before.v.buildingPosition[2])-(after.s.distance-before.s.distance))<.001);assert.notDeepEqual(before.v.marbleQuaternion,after.v.marbleQuaternion);
 await page.screenshot({path:'/tmp/howyoucoin-dunes-play.png'});
 await page.locator('#pause').tap();await page.locator('#quit').tap();await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);await page.screenshot({path:'/tmp/howyoucoin-phone.png'});
