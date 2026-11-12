@@ -22,9 +22,9 @@ Follow README.md for install, build, preview, browser tests, and deployment comm
 
 ## Current gameplay decisions
 
-- Coins fill a visible meter: every 100 coins automatically activates six seconds of star power. Coins during star power count toward the next activation. Distance is the personal-best score. Star power breaks blocks/barriers but does not prevent falls or bridge gaps. No floating star pickups remain.
+- Coins fill a visible meter: every 100 coins automatically activates six seconds of star power. Coins during star power count toward the next activation. Distance is the personal-best score. Star power breaks blocks/barriers and supports the marble at road height across gaps and beyond both road edges. Steering and jumping remain unrestricted; normal falls resume immediately on expiry if the marble is not over solid road. No floating star pickups remain.
 - Hints default to the first three runs per browser/device. Explicit on/off overrides persist. Switching hints off must immediately hide all transient hints, including resume/boost/sector/star messages; the essential HUD stays visible.
-- Steering is critically damped, with no spring overshoot. Deliberate movement beyond either road edge must remain possible.
+- Steering is critically damped, with no spring overshoot. Deliberate movement beyond either road edge must remain possible, with falls prevented only while star power is active.
 - Latest tuning: after the opening tutorial stretch, every tenth 40 m course chunk is a boost and other chunks contain hazards. Previously some chunks were empty and boosts were every seventh chunk. Keep enough spacing for consecutive jumps; shrinking chunks also changes coin pacing.
 - Speed ramps from 18 m/s toward 38 m/s, plus temporary boosts. Five themes: Night Shift, Golden Dunes, Cloud Forest, Prism Orbit, and Abyssal Bloom.
 - Scenery must approach in the same direction as the road; rolling marble reflections should respond to moving scenery.
