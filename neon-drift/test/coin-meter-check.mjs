@@ -57,8 +57,9 @@ const expiry=await page.evaluate(async()=>{
 await page.keyboard.up('ArrowRight');
 console.log('EDGE EXPIRY',expiry);
 assert.ok(expiry.powered.x>5 && expiry.powered.star>0 && expiry.powered.hud && expiry.powered.aura);
+assert.ok(expiry.powered.opacity>0);
 assert.equal(expiry.lastPowered.y,.56);
-assert.notEqual(expiry.lastPowered.countdown,'0.0s');
+assert.equal(expiry.lastPowered.countdown,'0.1s');
 assert.equal(expiry.fall.mode,'running');
 assert.equal(expiry.fall.star,0);
 assert.equal(expiry.fall.hud,false);
