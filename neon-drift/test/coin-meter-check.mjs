@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||chromium.executablePath(),headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader']});
 const page=await browser.newPage({viewport:{width:820,height:1180},hasTouch:true,isMobile:true,deviceScaleFactor:.8});const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 await page.addInitScript(()=>{
- Math.random=()=>.41231;let frames=[],now=performance.now();window.requestAnimationFrame=cb=>{frames.push(cb);return frames.length;};window.__step=(count=1)=>{for(let i=0;i<count;i++){now+=1000/60;const callbacks=frames;frames=[];for(const cb of callbacks)cb(now);}};performance.now=()=>now;
+ Math.random=()=>.41231;window.__browserFrame=window.requestAnimationFrame.bind(window);let frames=[],now=performance.now();window.requestAnimationFrame=cb=>{frames.push(cb);return frames.length;};window.__step=(count=1)=>{for(let i=0;i<count;i++){now+=1000/60;const callbacks=frames;frames=[];for(const cb of callbacks)cb(now);}};performance.now=()=>now;
  window.__skipDraw=true;for(const method of ['drawElements','drawArrays','drawElementsInstanced','drawArraysInstanced']){const original=WebGL2RenderingContext.prototype[method];WebGL2RenderingContext.prototype[method]=function(...args){if(!window.__skipDraw)return original.apply(this,args);};}
 });
 await page.goto('http://127.0.0.1:4173',{waitUntil:'networkidle'});
@@ -38,4 +38,35 @@ result=await driveToCoins(101);assert.equal(result.state.starCharge,1);assert.eq
 await page.evaluate(()=>{window.__skipDraw=false;window.__step(8);window.__skipDraw=true;});await page.screenshot({path:'/tmp/howyoucoin-coin-star.png'});
 result=await driveToCoins(200);assert.equal(result.state.starActivations,2);assert.equal(result.state.starCharge,0);assert.ok(result.state.star>5.9);assert.equal(result.toastVisible,false);console.log('REWARDS',result.state);
 await page.evaluate(()=>{document.getElementById('pause').click();window.__step();document.getElementById('restart-pause').click();window.__step(3);});const reset=await page.evaluate(()=>window.__howYouCoin.getState());assert.equal(reset.coins,0);assert.equal(reset.starCharge,0);assert.equal(reset.star,0);assert.equal(reset.starActivations,0);assert.deepEqual(errors,[]);
-console.log('PASS: three-run onboarding, mid-run off/resume, persistence, 99→100→101→200 coins, automatic power, charging during power, pause and reset.');await browser.close();
+await driveToCoins(100);
+await page.keyboard.down('ArrowRight');
+const expiry=await page.evaluate(async()=>{
+ const state=()=>window.__howYouCoin.getState(),screen=document.getElementById('star-screen');
+ const sample=()=>{const {mode,star,x,y}=state();return {mode,star,x,y,countdown:document.getElementById('star-time').textContent,hud:document.getElementById('star-hud').checkVisibility(),aura:window.__howYouCoin.getVisualState().starAura,opacity:Number(getComputedStyle(screen).opacity)};};
+ for(let i=0;i<360 && state().star>1.2;i++)window.__step();
+ const powered=sample();let lastPowered,fall;
+ for(let i=0;i<180;i++){
+  await new Promise(window.__browserFrame);window.__step();
+  const frame=sample();
+  if(frame.star>0)lastPowered=frame;
+  if(frame.y<.56){fall=frame;break;}
+ }
+ window.__step(100);
+ return {powered,lastPowered,fall,end:sample()};
+});
+await page.keyboard.up('ArrowRight');
+console.log('EDGE EXPIRY',expiry);
+assert.ok(expiry.powered.x>5 && expiry.powered.star>0 && expiry.powered.hud && expiry.powered.aura);
+assert.equal(expiry.lastPowered.y,.56);
+assert.notEqual(expiry.lastPowered.countdown,'0.0s');
+assert.equal(expiry.fall.mode,'running');
+assert.equal(expiry.fall.star,0);
+assert.equal(expiry.fall.hud,false);
+assert.equal(expiry.fall.aura,false);
+assert.equal(expiry.fall.opacity,0);
+assert.equal(expiry.end.mode,'dead');
+assert.equal(expiry.end.hud,false);
+assert.equal(expiry.end.aura,false);
+assert.equal(expiry.end.opacity,0);
+assert.deepEqual(errors,[]);
+console.log('PASS: three-run onboarding, mid-run off/resume, persistence, 99→100→101→200 coins, automatic power, charging during power, pause, reset and off-road expiry.');await browser.close();
